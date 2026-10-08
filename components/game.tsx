@@ -4,10 +4,12 @@ import {actionForKey, actions, beats, checkpointFor, initialState, reducer, wind
 import {GameAudio} from "@/lib/audio";
 import Dialog from "./dialog";
 import Icon from "./icon";
+import Robot from "./robot";
+import {successMs, failureMs} from "@/lib/motion";
 
 const roomNames = ["Attracco", "Sicurezza", "Archivio", "NEXUS"];
 const art = {bridge:"/scenes/bridge.webp",hall:"/scenes/hall.webp",vault:"/scenes/vault.webp",core:"/scenes/core.webp"};
-const assets = ["/scenes/milo.webp", ...Object.values(art)];
+const assets = Object.values(art);
 const format = (n: number) => String(n).padStart(4,"0");
 export default function Game() {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -83,15 +85,17 @@ export default function Game() {
     {help && <aside id="how-to" className="help-panel"><strong>Guarda. Scegli. Sopravvivi.</strong><p>Aspetta il segnale, poi premi la direzione indicata o Spazio. Puoi usare anche WASD e i pulsanti sotto la scena. Una scelta errata o il tempo scaduto costa una vita. Ogni nuova stanza crea un checkpoint.</p><p><kbd>Esc</kbd> o <kbd>P</kbd> per la pausa. Tre vite per tentativo. I pulsanti si attivano solo durante una scelta.</p><button data-ui className="quiet-button" onClick={()=>setHelp(false)}>Chiudi istruzioni ×</button></aside>}
     <section className="mission-heading"><div><span className="eyebrow">UN’AVVENTURA CINEMATOGRAFICA INTERATTIVA</span><h1>Un piccolo robot.<br className="mobile-break"/> Una grande anomalia.</h1></div><span className="episode-label">EPISODIO 01<span>Protocollo di risveglio</span></span></section>
     <section className={`game-stage phase-${state.phase} ${state.paused?"is-paused":""} room-${beat.room}`} aria-label="Scena di gioco" data-phase={state.phase} data-index={state.index} data-paused={state.paused}>
-      <div className="scene-camera" key={state.phase==="menu"?"menu":beat.room}>
+      <div className="scene-camera" key={state.phase==="menu"?"menu":state.index}>
         {/* Art is preloaded before the clock starts; plain images avoid loading delays between QTEs. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="scene-art" src={state.phase==="menu"?"/scenes/cover.webp":art[beat.room]} alt="" draggable={false}/>
-        {state.phase!=="menu" && <div key={`${state.index}-${state.phase}`} className={`milo actor-${state.phase} move-${beat.correct}`} aria-hidden="true"><img src="/scenes/milo.webp" alt="" draggable={false}/><div className="actor-shadow"/></div>}
+        <div className="scene-platform" aria-hidden="true"/>
+        {state.phase!=="menu" && <Robot key={`${state.index}-${state.phase}`} index={state.index} phase={state.phase} paused={state.paused} duration={state.phase==="intro"?beat.introMs:state.phase==="cue"?windowFor(state.mode):state.phase==="success"?successMs:failureMs}/>}
         <div className="atmosphere" aria-hidden="true"/>
         <div className="particles" aria-hidden="true">{Array.from({length:14},(_,i)=><i key={i} style={{"--x":`${(i*37+9)%100}%`,"--delay":`${-i*.7}s`,"--speed":`${4+i%4}s`} as CSSProperties}/>)}</div>
         {active && state.index===1 && <svg className="security-drone" viewBox="0 0 120 60" aria-hidden="true"><path d="M15 15 42 8l18 12 18-12 27 7-15 15 8 12-26 3-12-10-12 10-26-3 8-12Z" fill="#394858" stroke="#10212b" strokeWidth="3"/><ellipse cx="60" cy="27" rx="18" ry="10" fill="#111922" stroke="#dba05b" strokeWidth="2"/><circle cx="60" cy="27" r="5" fill="#ff6c6c"/><path d="M8 18h23M89 18h23" stroke="#67d6e8" strokeWidth="3"/></svg>}
-        {active && <div className={`hazard hazard-${state.index} ${state.phase==="cue"?"armed":""}`} aria-hidden="true"><span/><span/><span/></div>}
+        {active && <div className={`hazard hazard-${state.index} ${["cue","success","failure"].includes(state.phase)?"armed":""}`} aria-hidden="true"><span/><span/><span/></div>}
+        {active && <div key={`${state.index}-${state.phase}-fx`} className={`shot-effects shot-${state.index}`} aria-hidden="true"><div className="impact-flash"/><div className="energy-wave"/><div className="foreground-debris">{Array.from({length:6},(_,i)=><i key={i} style={{"--piece":i} as CSSProperties}/>)}</div></div>}
       </div>
       <div className="vignette" aria-hidden="true"/>
       <div className="stage-topline"><span className="live-tag"><i/>{state.phase==="menu"?"STAZIONE ORBITALE · NEXUS":beat.chapter.toUpperCase()}</span><div className="stage-tools"><button data-ui className="icon-button" onClick={toggleSound} aria-label={sound?"Disattiva audio":"Attiva audio"} aria-pressed={sound}><Icon name={sound?"sound":"mute"}/></button>{active&&<button data-ui className="icon-button" onClick={()=>dispatch({type:state.paused?"resume":"pause"})} aria-label={state.paused?"Riprendi":"Pausa"}><Icon name={state.paused?"play":"pause"}/></button>}</div></div>

@@ -1,0 +1,99 @@
+/* The actor stays anchored to the floor. Travel, articulated poses and the
+   ground shadow are independent; a leap never carries its shadow into the air. */
+.milo{position:absolute;left:23%;bottom:25%;width:21%;height:35%;z-index:2;pointer-events:none}
+.room-hall .milo{bottom:22%}.room-vault .milo{bottom:33%}.room-core .milo{bottom:23%}
+.robot-flight,.ground-track{position:absolute;inset:0;transform-origin:50% 95%;will-change:transform}
+.robot-rig{width:100%;height:100%;overflow:visible;filter:drop-shadow(2px 5px 2px #04121a77)}
+.robot-rig [data-part]{transform-origin:0 0;transform-box:view-box}
+.robot-rig .rig-body{transform-origin:160px 230px}
+.actor-shadow{position:absolute;left:18%;bottom:5%;width:65%;height:6%;border-radius:50%;background:#020c14ba;filter:blur(5px)}
+.rig-eyes{animation:robot-blink 5s infinite;transform-origin:25px -37px}
+.rig-antenna{animation:antenna-flex 1.7s ease-in-out infinite alternate;transform-origin:-11px -95px}
+.actor-cue .rig-eyes{animation:none;transform:scaleY(.8)}
+.actor-failure .rig-eyes{animation:eye-fault .17s steps(2) 6 .15s both}
+.actor-success .rig-antenna{animation:antenna-action 2.8s ease-in-out both}
+.robot-charge,.carried-core,.speed-streaks,.landing-dust{pointer-events:none;position:absolute;opacity:0}
+.robot-charge{inset:12% 4%;border-radius:50%;background:radial-gradient(ellipse,#70fff02e,transparent 65%);mix-blend-mode:screen}
+.carried-core{height:10%;width:10%;right:11%;top:51%;border-radius:4px;background:#a0fffa;box-shadow:0 0 18px 6px #42d9e7;transform:rotate(35deg);border:2px solid #fff0b5}
+.actor-success[data-motion="4"] .carried-core{animation:core-catch 2.8s both}
+.actor-success[data-motion="4"] .robot-charge,.actor-success[data-motion="7"] .robot-charge{animation:charge-pulse 2.8s both}
+.speed-streaks{inset:25% 50% 15% -40%}
+.speed-streaks i{position:absolute;right:0;width:90%;height:2px;border-radius:50%;background:linear-gradient(90deg,transparent,#fff4be88);top:20%}
+.speed-streaks i:nth-child(2){top:50%;width:120%}.speed-streaks i:nth-child(3){top:80%;width:65%}
+.actor-success[data-motion="1"] .speed-streaks,.actor-success[data-motion="3"] .speed-streaks{animation:speed-trail 2.8s both}
+.landing-dust{left:20%;right:20%;bottom:0;height:15%}
+.landing-dust i{position:absolute;bottom:0;left:50%;width:40%;height:70%;border-radius:50%;background:radial-gradient(ellipse,#dbc9a969,transparent 65%)}
+.landing-dust i:nth-child(even){left:0}
+.actor-success[data-motion="0"] .landing-dust,.actor-success[data-motion="5"] .landing-dust{animation:landing-burst .55s ease-out 2.05s both}
+.actor-success[data-motion="1"] .landing-dust{animation:slide-dust 2.8s both}
+.actor-success[data-motion="2"] .landing-dust,.actor-success[data-motion="3"] .landing-dust,.actor-success[data-motion="6"] .landing-dust{animation:run-dust 2.8s both}
+
+/* A separate camera pass follows the action; UI and captions remain steady. */
+.phase-success .scene-art{animation:camera-action 2.8s both}
+.phase-success[data-index="2"] .scene-art,.phase-success[data-index="6"] .scene-art{animation:camera-cover 2.8s both}
+.phase-success[data-index="4"] .scene-art,.phase-success[data-index="7"] .scene-art{animation:camera-connect 2.8s both}
+.phase-failure .scene-camera{animation:camera-hit .65s both}
+.phase-failure .scene-art{animation:none;transform:scale(1.045)}
+.shot-effects{position:absolute;inset:0;pointer-events:none;z-index:3}
+.impact-flash,.energy-wave{position:absolute;inset:0;opacity:0}
+.impact-flash{background:radial-gradient(ellipse at 38% 55%,#ff905955,transparent 65%);mix-blend-mode:screen}
+.phase-failure .impact-flash{animation:hit-flash .5s both}
+.energy-wave{border:3px solid #76eee7;border-radius:50%;height:15%;width:10%;left:57%;top:39%;box-shadow:0 0 25px #5ff9da}
+.phase-success[data-index="4"] .energy-wave,.phase-success[data-index="7"] .energy-wave{animation:energy-release 1.15s ease-out 1.6s both}
+.foreground-debris{position:absolute;inset:0;opacity:0}
+.foreground-debris i{position:absolute;left:calc(32% + var(--piece)*6%);bottom:24%;height:calc(5px + var(--piece)*2px);width:calc(7px + var(--piece)*2px);background:#758b8d;border:1px solid #b6b5a0;box-shadow:2px 3px 3px #03101870;transform:rotate(calc(var(--piece)*32deg));animation:debris-fall 2.8s cubic-bezier(.42,0,1,.55) both}
+.phase-success[data-index="0"] .foreground-debris,.phase-failure[data-index="0"] .foreground-debris,.phase-success[data-index="5"] .foreground-debris{opacity:1}
+.phase-success .hazard-0 span:first-child{animation:bridge-crack 2.8s both}
+.phase-success .hazard-1 span:first-child,.phase-success .hazard-6 span:first-child{animation:laser-fire 2.8s both}
+.phase-failure .hazard-1 span:first-child,.phase-failure .hazard-6 span:first-child{animation:laser-hit .35s both}
+.phase-success .hazard-3 span{animation:grid-pass 2.8s both}
+.phase-success .hazard-4 span:first-child,.phase-success .hazard-7 span:first-child{animation:terminal-pulse 2.8s both}
+.phase-success .hazard-2{animation:warning-clear 2.8s both}
+.phase-success .hazard-5{animation:coolant-rise 2.8s linear both}
+.phase-success .security-drone{animation:drone-recoil 2.8s both}
+.phase-success[data-index="7"] .atmosphere{animation:power-restored 2.8s both}
+.scene-platform{display:none;position:absolute;left:58%;bottom:22.5%;width:27%;height:2.5%;background:repeating-linear-gradient(90deg,#283e49 0 19px,#71818a 20px 22px);border-top:3px solid #b9ada0;border-bottom:5px solid #101c29;box-shadow:0 6px 14px #020c1499;transform:skewX(-17deg);z-index:1}
+.scene-platform::after{content:"";position:absolute;left:0;right:0;top:4px;height:2px;background:#75ccc0;box-shadow:0 0 9px #40efcf}
+.game-stage:not(.phase-menu)[data-index="0"] .scene-platform,.game-stage[data-index="1"] .scene-platform,.game-stage[data-index="4"] .scene-platform,.game-stage[data-index="5"] .scene-platform{display:block}
+.game-stage[data-index="1"] .scene-platform{left:50%;width:35%}
+.game-stage[data-index="4"] .scene-platform{left:37%;width:30%;bottom:30.5%}
+.game-stage[data-index="5"] .scene-platform{bottom:30.5%;background:repeating-linear-gradient(90deg,#28413b 0 19px,#788e7d 20px 22px)}
+
+@keyframes robot-blink{0%,43%,48%,100%{transform:scaleY(1)}45%,46%{transform:scaleY(.12)}}
+@keyframes antenna-flex{from{transform:rotate(-4deg)}to{transform:rotate(5deg)}}
+@keyframes antenna-action{0%{transform:rotate(0)}12%{transform:rotate(-22deg)}35%{transform:rotate(18deg)}65%{transform:rotate(-15deg)}80%{transform:rotate(12deg)}92%{transform:rotate(-5deg)}100%{transform:rotate(0)}}
+@keyframes eye-fault{0%{opacity:1}100%{opacity:.12;transform:scaleY(.25)}}
+@keyframes core-catch{0%,65%{opacity:0}73%,100%{opacity:1}}
+@keyframes charge-pulse{0%,45%,100%{opacity:0;transform:scale(.7)}65%{opacity:1;transform:scale(1.2)}82%{opacity:.5;transform:scale(1)}}
+@keyframes speed-trail{0%,10%,72%,100%{opacity:0;transform:scaleX(.6)}25%,54%{opacity:.8;transform:scaleX(1)}}
+@keyframes landing-burst{0%{opacity:0;transform:scale(.2)}20%{opacity:.8}100%{opacity:0;transform:scale(2.3) translateY(-20%)}}
+@keyframes slide-dust{0%,16%,90%,100%{opacity:0;transform:translateX(-60%) scale(1)}30%,65%{opacity:.7;transform:translateX(-80%) scale(1.7)}}
+@keyframes run-dust{0%,10%,76%,100%{opacity:0}22%,40%,58%{opacity:.7;transform:scale(1.5)}31%,49%,67%{opacity:.15;transform:scale(.8)}}
+@keyframes camera-action{0%,9%{transform:scale(1.04) translateX(0)}38%{transform:scale(1.09) translateX(-1.5%) rotate(-.35deg)}76%{transform:scale(1.06) translateX(-2.2%)}80%{transform:scale(1.06) translate(-2.2%,.45%)}85%{transform:scale(1.06) translate(-2.2%,-.2%)}100%{transform:scale(1.06) translateX(-2.2%)}}
+@keyframes camera-cover{0%{transform:scale(1.04)}55%{transform:scale(1.1) translateX(2%)}100%{transform:scale(1.07) translateX(1.3%)}}
+@keyframes camera-connect{0%{transform:scale(1.04)}60%,100%{transform:scale(1.12) translateX(-2%)}}
+@keyframes camera-hit{0%,100%{transform:translate(0)}16%{transform:translate(-6px,3px) rotate(-.4deg)}35%{transform:translate(4px,-2px) rotate(.3deg)}53%{transform:translate(-3px,1px)}72%{transform:translate(2px)}}
+@keyframes hit-flash{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+@keyframes energy-release{0%{opacity:0;transform:scale(.3)}15%{opacity:.9}100%{opacity:0;transform:scale(8)}}
+@keyframes debris-fall{0%,10%{opacity:0;translate:0 -5px}16%{opacity:1;translate:0 0}100%{opacity:0;translate:calc(var(--piece)*8px) 320px;rotate:140deg}}
+@keyframes bridge-crack{0%,8%{opacity:1}23%{transform:rotate(14deg) translateY(20px);opacity:1}60%,100%{transform:rotate(25deg) translateY(200px);opacity:0}}
+@keyframes laser-fire{0%,14%{opacity:.2;transform:rotate(-9deg) scaleX(.15)}19%,54%{opacity:1;transform:rotate(-9deg) scaleX(1)}64%,100%{opacity:0;transform:rotate(-9deg) scaleX(1)}}
+@keyframes laser-hit{0%{opacity:.3;transform:rotate(-15deg) scaleX(.1)}35%,100%{opacity:1;transform:rotate(-15deg) scaleX(1)}}
+@keyframes grid-pass{0%{opacity:1;translate:0 0}58%{opacity:1;translate:-70px 0}80%,100%{opacity:0;translate:-100px 0}}
+@keyframes terminal-pulse{0%,45%{opacity:.7;scale:1}65%{opacity:1;scale:.7}100%{opacity:0;scale:1.8}}
+@keyframes warning-clear{0%,30%{opacity:1}100%{opacity:0}}
+@keyframes drone-recoil{0%{transform:translate(0)}18%{transform:translate(6px,-3px) rotate(5deg)}36%{transform:translate(0) rotate(-3deg)}100%{transform:translate(0)}}
+@keyframes power-restored{0%,50%{opacity:.7;background:#ef3d2033}72%{opacity:1;background:#68e6b977}100%{opacity:.7;background:#43cdb333}}
+
+@media(max-width:700px){
+  .milo{width:31%;height:30%;left:18%;bottom:32%}
+  .room-hall .milo{bottom:29%}.room-vault .milo{bottom:37%}.room-core .milo{bottom:31%}
+  .foreground-debris i{bottom:32%}
+  .scene-platform{bottom:32%;width:32%;left:58%}.game-stage[data-index="1"] .scene-platform{bottom:32%}.game-stage[data-index="4"] .scene-platform,.game-stage[data-index="5"] .scene-platform{bottom:37%}
+}
+@media(prefers-reduced-motion:reduce){
+  .robot-flight,.ground-track{will-change:auto}
+  .milo *{animation:none!important}
+  .speed-streaks,.landing-dust,.shot-effects{display:none}
+  .phase-success .scene-art,.phase-failure .scene-art{transform:none}
+}

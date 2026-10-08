@@ -1,3 +1,4 @@
+import {successMs, failureMs} from "./motion";
 export type Action = "left" | "up" | "right" | "down" | "action";
 export type Room = "bridge" | "hall" | "vault" | "core";
 export type Beat = { room: Room; chapter: string; title: string; narration: string; cue: string; correct: Action; success: string; failure: string; introMs: number };
@@ -29,7 +30,7 @@ export type Phase = "menu" | "intro" | "cue" | "success" | "failure" | "gameover
 export type GameState = {phase: Phase; index: number; lives: number; score: number; remaining: number; mode: "story" | "arcade"; paused: boolean; checkpointScore: number};
 export const initialState: GameState = {phase:"menu",index:0,lives:3,score:0,remaining:0,mode:"story",paused:false,checkpointScore:0};
 export type Event = {type:"start";mode:GameState["mode"]} | {type:"tick";elapsed:number} | {type:"input";action:Action} | {type:"pause"} | {type:"resume"} | {type:"retry"} | {type:"menu"};
-function fail(state: GameState): GameState {return {...state,phase:"failure",lives:state.lives-1,remaining:2000};}
+function fail(state: GameState): GameState {return {...state,phase:"failure",lives:state.lives-1,remaining:failureMs};}
 export function reducer(state: GameState, event: Event): GameState {
   if(event.type === "menu") return {...initialState,mode:state.mode};
   if(event.type === "start") return {...initialState,mode:event.mode,phase:"intro",remaining:beats[0].introMs};
@@ -40,7 +41,7 @@ export function reducer(state: GameState, event: Event): GameState {
   if(event.type === "input") {
     if(state.phase !== "cue") return state;
     if(event.action !== beats[state.index].correct) return fail(state);
-    return {...state,phase:"success",score:state.score+scoreFor(state.remaining,windowFor(state.mode)),remaining:1700};
+    return {...state,phase:"success",score:state.score+scoreFor(state.remaining,windowFor(state.mode)),remaining:successMs};
   }
   if(event.type === "tick") {
     if(!["intro","cue","success","failure"].includes(state.phase)) return state;

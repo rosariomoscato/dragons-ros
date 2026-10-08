@@ -2,7 +2,7 @@
 
 Un’avventura sci-fi cinematografica a scelte a tempo. MILO, un piccolo robot di manutenzione, deve ripristinare una stazione orbitale controllata dall’AI NEXUS. Personaggi e ambientazione originali, con direzione artistica cartoon scelta dai concept.
 
-Il livello è giocabile: quattro ambienti illustrati, otto situazioni, animazioni 2D del personaggio, effetti luminosi, suoni sintetizzati, tre vite e checkpoint a ogni nuova stanza. Una partita dura circa 1–2 minuti senza errori; i tentativi possono allungarla. È un PoC con illustrazioni animate tramite CSS, da sviluppare ulteriormente per ottenere sequenze d’animazione cinematografica complete.
+Il livello è giocabile: quattro ambienti illustrati, otto situazioni, robot 2D articolato con otto coreografie, effetti luminosi, suoni sintetizzati, tre vite e checkpoint a ogni nuova stanza. Una partita dura circa 1–2 minuti senza errori; i tentativi possono allungarla. Il personaggio usa un rig SVG: braccia, gomiti, gambe, ginocchia, testa e sciarpa si muovono separatamente. Salti, scivolate, scatti e interazioni hanno anticipazione, contatto e recupero, con camera, ombre ed effetti sincronizzati. Le azioni riuscite durano 2,8 secondi. Resta un PoC: per ottenere l’animazione tradizionale di un film servono sequenze disegnate fotogramma per fotogramma.
 
 ## Avvio
 
@@ -46,7 +46,7 @@ npm run build
 npm run test:e2e
 ```
 
-Cinque test di logica e quattro test browser verificano: completamento di tutte le otto scelte da tastiera, record persistente, timeout, game over, checkpoint, pausa, visibilità della pagina, audio disattivabile, storage indisponibile e comandi touch. Sono stati eseguiti su Chromium, inclusi viewport mobile da 390 e 320 px; Safari e Firefox non sono ancora verificati.
+Cinque test di logica e sei test browser verificano: completamento di tutte le otto scelte da tastiera, record persistente, timeout, game over, checkpoint, pausa, visibilità della pagina, audio disattivabile, storage indisponibile e comandi touch. I test di movimento verificano anche ombra a terra, articolazioni indipendenti, pausa delle animazioni e movimento ridotto. Sono stati eseguiti su Chromium, inclusi viewport mobile da 390 e 320 px; Safari e Firefox non sono ancora verificati.
 
 Il runner browser avvia la build di produzione sulla porta 3000. Se Chromium non è installato, esegui `npx playwright install chromium`. Puoi indicare un binario già presente con `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. Nella macchina cloud viene usato `/usr/bin/chromium`. Esegui nuovamente la build dopo modifiche al codice, prima dei test E2E.
 
@@ -58,12 +58,15 @@ Il runner browser avvia la build di produzione sulla porta 3000. Se Chromium non
 4. Seleziona Node.js 24, o un’altra versione supportata compatibile con il requisito del progetto.
 5. Esegui il deploy e verifica una partita in entrambe le modalità sul dominio di Vercel.
 
-Non servono variabili d’ambiente, API key, database o backend di gioco. Tutti gli asset sono locali; non vengono richiesti font o servizi esterni dal gameplay. Il deploy su Vercel non è stato eseguito in questa sessione.
+Non servono variabili d’ambiente, API key, database o backend di gioco. Tutti gli asset sono locali; non vengono richiesti font o servizi esterni dal gameplay. Il primo deploy è stato pubblicato e acquisito dall’utente. Dopo l’acquisizione, l’accesso anonimo è revocato: per gli aggiornamenti collega il repository GitHub nelle impostazioni Git del progetto oppure autentica la CLI sul relativo account Vercel.
 
 ## Struttura
 
 - `components/game.tsx`: interfaccia, input, orologio, precaricamento delle scene e persistenza del record.
 - `lib/game.ts`: livello e macchina a stati pura. Per cambiare il livello, modifica `beats`.
+- `components/robot.tsx`: rig articolato e riproduzione delle sequenze tramite Web Animations API, con pausa e movimento ridotto.
+- `lib/motion.ts`: pose e coreografie delle otto scene, durate delle sequenze.
+- `app/motion.css`: camera, ombre, luce, detriti e impatti.
 - `lib/audio.ts`: effetti audio tramite Web Audio.
 - `app/globals.css`: layout responsive, animazioni e impostazione reduced-motion.
 - `public/scenes`: cinque illustrazioni WebP e lo sprite trasparente di MILO, circa 2 MB in totale.
@@ -73,7 +76,7 @@ Non servono variabili d’ambiente, API key, database o backend di gioco. Tutti 
 
 ## Limiti del PoC
 
-Un livello, sequenza lineare, checkpoint durante la sessione e record locale. Non sono inclusi salvataggi della partita, filmati animati, doppiaggio, livelli aggiuntivi o backend. Le animazioni del personaggio sono trasformazioni di uno sprite; non è ancora un’animazione fotogramma per fotogramma. I test automatizzati usano il clock controllato di Playwright per attraversare le stesse transizioni del gioco più rapidamente.
+Un livello, sequenza lineare, checkpoint durante la sessione e record locale. Non sono inclusi salvataggi della partita, filmati animati, doppiaggio, livelli aggiuntivi o backend. Il personaggio è un rig 2D con articolazioni animate; non è ancora un’animazione disegnata fotogramma per fotogramma. Lo sprite illustrato originale rimane negli asset come riferimento visivo. I test automatizzati usano il clock controllato di Playwright per attraversare le stesse transizioni del gioco più rapidamente.
 
 ## Skill di progetto
 

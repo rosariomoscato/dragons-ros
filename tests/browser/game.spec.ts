@@ -1,3 +1,4 @@
+import {successMs,failureMs} from "../../lib/motion";
 import {test,expect} from "@playwright/test";
 import {beats,windowFor} from "../../lib/game";
 const keys={left:"ArrowLeft",right:"ArrowRight",up:"ArrowUp",down:"ArrowDown",action:"Space"};
@@ -16,7 +17,7 @@ test("livello completo, otto QTE da tastiera e record persistente",async({page})
   if(i===0)await page.screenshot({path:"/tmp/signal-lost-gameplay.png",fullPage:true,animations:"disabled"});
   await page.keyboard.press(keys[beats[i].correct]);
   await expect(stage).toHaveAttribute("data-phase","success");
-  await page.clock.runFor(1800);
+  await page.clock.runFor(successMs+100);
  }
  await expect(page.getByRole("dialog",{name:"Missione completata"})).toBeVisible();
  const best=await page.evaluate(()=>Number(localStorage.getItem("signal-lost-best-story")));
@@ -42,10 +43,10 @@ test("pausa congela la scelta; timeout, game over e nuovo tentativo",async({page
  await page.clock.runFor(windowFor("arcade")+100);
  await expect(stage).toHaveAttribute("data-phase","failure");
  await expect(page.getByLabel("2 vite rimaste")).toBeVisible();
- await page.clock.runFor(2100);
+ await page.clock.runFor(failureMs+100);
  for(let i=0;i<2;i++){
   await page.clock.runFor(beats[0].introMs+100);await page.keyboard.press("ArrowLeft");
-  await expect(stage).toHaveAttribute("data-phase","failure");await page.clock.runFor(2100);
+  await expect(stage).toHaveAttribute("data-phase","failure");await page.clock.runFor(failureMs+100);
  }
  await expect(page.getByRole("dialog",{name:"Connessione interrotta"})).toBeVisible();
  await page.getByRole("button",{name:"Riprova dal checkpoint"}).click();
