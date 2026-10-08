@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "create-brand-kit": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/apps/create-brand-kit/SKILL.md",
+      "computedHash": "dfd2bed5a6226e3b9ad8fbc756cca8a0dc9160ae87abadd9e50c37c2322960ff"
+    },
+    "create-upstash-software-factory": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/factories/create-upstash-software-factory/SKILL.md",
+      "computedHash": "ab17cb9622e66b8c2a9f141bc7b28c3aa52580a59c93cc0a6688f571179d822d"
+    },
+    "create-video-shorts": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/video-editing/create-video-shorts/SKILL.md",
+      "computedHash": "7ea914b7726b9334018fbb231f3f2c35e1b6a4cf01500a30464eae3eaa1bfc9c"
+    },
+    "create-youtube-thumbnails": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/video-editing/create-youtube-thumbnails/SKILL.md",
+      "computedHash": "36a9383c8f8e3c1c35d73bcd5dff8b2c98b806821c54326197e2fc554b046cfb"
+    },
+    "davinci-resolve-pro-edit": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/video-editing/davinci-resolve-pro-edit/SKILL.md",
+      "computedHash": "381a426a9e00e86f8912fe8e3b057dea23e805c60c66e909cc97647f12352c7c"
+    },
+    "davinci-resolve-video-edit": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/video-editing/davinci-resolve-video-edit/SKILL.md",
+      "computedHash": "1c945e64117a1199ba8e51e9aea614d25f58990d02098ab35ad29f4693081171"
+    },
+    "deploy-an-app": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/apps/deploy-an-app/SKILL.md",
+      "computedHash": "7bf68bff7a5cd09dfaa17dc1fff01673301effbc66e3ce05cc798dc433cb03cb"
+    },
+    "review-an-app": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/apps/review-an-app/SKILL.md",
+      "computedHash": "9141952671a8d1d790e0fadea2c7fbc09334a63be01ec864eec564a6c28577d7"
+    },
+    "start-an-app": {
+      "source": "leonvanzyl/skills",
+      "sourceType": "github",
+      "skillPath": "skills/apps/start-an-app/SKILL.md",
+      "computedHash": "65110b0f3900659683800fb41607cd497d0e92a92607fdebaa2230910a8c728b"
+    }
+  }
+}
