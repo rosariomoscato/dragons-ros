@@ -2,9 +2,32 @@
 
 Un’avventura sci-fi cinematografica a scelte a tempo. MILO, un piccolo robot di manutenzione, deve ripristinare una stazione orbitale controllata dall’AI NEXUS. Personaggi e ambientazione originali, con direzione artistica cartoon scelta dai concept.
 
+[**Gioca alla demo su Vercel →**](https://snappy-oxygen-1pi01y4.vercel.app)
+
+![MILO nel settore di attracco: sequenza di tre comandi, combo, vite e azione a tempo](docs/gameplay.png)
+
+*Screenshot della versione giocabile attuale, nel primo settore della stazione.*
+
+## Versione attuale
+
 Il livello è giocabile: quattro ambienti illustrati, otto ostacoli con tre comandi consecutivi ciascuno, una scelta tra due percorsi, combo, tre vite e checkpoint a ogni nuovo settore. Una partita senza errori dura circa un minuto, in base al tempo impiegato per reagire. Nel finale bisogna mantenere premuta Azione per completare il ripristino.
 
-MILO usa un rig SVG: braccia, gomiti, gambe, ginocchia, testa e sciarpa si muovono separatamente. Salti, scivolate, scatti e interazioni durano 0,8–1,05 secondi, con anticipazione, contatto e recupero. Le pose sono interpolate continuamente e ogni comando parte dalla posa precedente; la posizione si conserva lungo il settore. I fondali cambiano con una sovrapposizione e un passaggio di servizio animato. Resta un PoC: per ottenere l’animazione tradizionale di un film servono sequenze disegnate fotogramma per fotogramma.
+L’ultimo aggiornamento introduce sequenze più serrate: dopo una mossa riuscita arriva subito il comando successivo. Nel corridoio puoi scegliere la via al riparo o una scorciatoia che cambia i comandi, riduce il tempo disponibile e assegna un bonus. La combo cresce con le risposte corrette; il finale richiede di mantenere premuto il comando Azione.
+
+MILO usa un rig SVG: braccia, gomiti, gambe, ginocchia, testa e sciarpa si muovono separatamente. Salti, scivolate, scatti e interazioni durano 0,8–1,05 secondi, con anticipazione, contatto e recupero; la celebrazione finale dura 1,5 secondi. Le pose sono interpolate continuamente e ogni comando parte dalla posa precedente; la posizione si conserva lungo il settore. Il personaggio rimane montato tra i comandi e i fondali dello stesso settore non vengono ricaricati. I cambi di settore usano una sovrapposizione dei fondali e un passaggio di servizio animato di 0,8 secondi. Pausa e movimento ridotto sono supportati anche durante queste sequenze.
+
+### Il primo livello
+
+| Settore | Situazioni |
+| --- | --- |
+| Attracco | Passerella che cede e inseguimento del drone |
+| Sicurezza | Scelta del percorso e attraversamento della griglia laser |
+| Archivio | Recupero del backup e fuga sulle piattaforme |
+| NEXUS | Riparo dal raggio e ripristino della stazione |
+
+## Stack
+
+Next.js con App Router, React e TypeScript. Il gioco gira nel browser: rig SVG e Web Animations API per MILO, CSS per gli effetti e i passaggi tra settori, Web Audio per i suoni sintetizzati. Le illustrazioni sono asset WebP locali; il record usa lo storage del browser. Il progetto è deployabile su Vercel senza database, servizi di gioco esterni o variabili d’ambiente.
 
 ## Avvio
 
@@ -49,7 +72,7 @@ npm run build
 npm run test:e2e
 ```
 
-Sei test di logica e nove test browser verificano: completamento dei 24 comandi, percorsi alternativi, combo, record persistente, timeout, game over, checkpoint, pausa, visibilità della pagina, audio disattivabile, storage indisponibile e comandi touch, incluso il mantenimento del pulsante finale. I test di movimento verificano anche continuità della posa, ombra a terra, sovrapposizione dei fondali, pausa delle animazioni e movimento ridotto. Sono stati eseguiti su Chromium, inclusi viewport mobile da 390 e 320 px; Safari e Firefox non sono ancora verificati.
+Sei test di logica e nove test browser verificano: completamento dei 24 comandi, percorsi alternativi, combo, record persistente, timeout, game over, checkpoint, pausa, visibilità della pagina, audio disattivabile, storage indisponibile e comandi touch, incluso il mantenimento del pulsante finale. I test di movimento verificano anche continuità della posa, ombra a terra, sovrapposizione dei fondali, pausa delle animazioni e movimento ridotto. Nell’ultima verifica del 9 ottobre 2026, build, controllo dei tipi e sei test di logica sono passati; tutti i nove test browser sono passati sia in locale sia sulla demo pubblica Vercel. È stata inoltre completata una partita a velocità reale sul percorso della scorciatoia, con combo 24 e nessun errore JavaScript. I controlli browser usano Chromium, inclusi viewport mobile da 390 e 320 px; Safari e Firefox non sono ancora verificati.
 
 Il runner browser avvia la build di produzione sulla porta 3000. Se Chromium non è installato, esegui `npx playwright install chromium`. Puoi indicare un binario già presente con `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. Nella macchina cloud viene usato `/usr/bin/chromium`. Esegui nuovamente la build dopo modifiche al codice, prima dei test E2E.
 
