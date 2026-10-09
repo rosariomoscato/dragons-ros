@@ -1,41 +1,68 @@
 "use client";
 import {useEffect, useRef} from "react";
-import {motionFor, type Pose} from "@/lib/motion";
-import type {Phase} from "@/lib/game";
+import {motionFor, sampleMotion, neutral, type Pose} from "@/lib/motion";
+import type {Phase,Action} from "@/lib/game";
 
-type Props = {index:number; phase:Phase; duration:number; paused:boolean};
+type Props={index:number;phase:Phase;duration:number;paused:boolean;action:Action;step:number;travel:number;carrying:boolean};
 
 // A cut-out style rig: pivoted upper/lower limbs, independent head, antenna,
 // eyes and scarf. The original cream shell / cyan visor / orange scarf remain.
-export default function Robot({index,phase,duration,paused}:Props) {
+export default function Robot({index,phase,duration,paused,action,step,travel,carrying}:Props) {
   const ref=useRef<HTMLDivElement>(null);
   const animations=useRef<Animation[]>([]);
+  const lastFace=useRef(1);
+  const previous=useRef<{index:number;phase:Phase}|null>(null);
   useEffect(()=>{
     const actor=ref.current!;
     const reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
-    const clip=motionFor(index,phase);
-    const animate=()=>{
-      animations.current.forEach(a=>a.cancel());
-      const options:KeyframeAnimationOptions={duration,fill:"both",easing:"linear"};
-      const add=(element:Element|null,transform:(p:Pose)=>string)=>{
-        if(!element)return;
-        const a=element.animate(clip.map(({offset,pose})=>({offset,transform:transform(pose),easing:"cubic-bezier(.3,0,.3,1)"})),options);
-        if(reduced.matches){a.currentTime=duration;a.pause();}
-        if(actor.closest(".is-paused"))a.pause();
-        animations.current.push(a);
-      };
-      add(actor.querySelector(".robot-flight"),p=>`translate(${p.x}%, ${p.y}%) rotate(${p.turn}deg) scale(${p.size*p.face}, ${p.size})`);
-      add(actor.querySelector(".ground-track"),p=>`translateX(${p.x}%) scale(${p.size*Math.max(.25,1+p.y/120)})`);
-      add(actor.querySelector('[data-part="body"]'),p=>`translateY(${p.bob}px) rotate(${p.body}deg)`);
-      for(const part of ["head","armBack","elbowBack","armFront","elbowFront","legBack","kneeBack","legFront","kneeFront","scarf"] as const)
-        add(actor.querySelector(`[data-part="${part}"]`),p=>`rotate(${p[part]}deg)`);
+    const source={...neutral};
+    const matrix=(selector:string)=>new DOMMatrix(getComputedStyle(actor.querySelector(selector)!).transform);
+    const parts=["head","armBack","elbowBack","armFront","elbowFront","legBack","kneeBack","legFront","kneeFront","scarf"] as const;
+    const origin=previous.current;
+    const reset=!origin || Math.floor(origin.index/2)!==Math.floor(index/2) || (origin.phase==="failure"&&phase==="intro");
+    const root=matrix('.robot-flight');
+    if(!reset){
+      const unit=actor.closest('.game-stage')!.clientWidth*.0012;
+      source.x=root.m41/unit;source.y=root.m42/actor.clientHeight*100;
+      source.turn=Math.atan2(root.m12,root.m11)*180/Math.PI;source.size=Math.hypot(root.m11,root.m12);
+      const body=matrix('[data-part="body"]');source.body=Math.atan2(body.m12,body.m11)*180/Math.PI;source.bob=body.m42;
+      for(const part of parts){const m=matrix(`[data-part="${part}"]`);source[part]=Math.atan2(m.m12,m.m11)*180/Math.PI;}
+    }
+    const facingSource=getComputedStyle(actor.querySelector(".robot-facing")!).transform;
+    animations.current.forEach(a=>a.cancel());animations.current=[];
+    const face=reset?1:phase==="success"&&action==="left"?-1:phase==="success"&&action==="right"?1:lastFace.current;
+    lastFace.current=face;
+    const target=motionFor(index,phase,action,step).map(f=>({...f,pose:{...f.pose,x:f.pose.x+travel,face}}));
+    if(reset){Object.assign(source,target[0].pose);}
+    // Ease from the live pose, including interrupted waits, without remounting
+    // the SVG. World travel persists through all commands in a sector.
+    const clip=sampleMotion([{offset:0,pose:source},...target.filter(f=>f.offset>0)]);
+    const last=clip[clip.length-1].pose;
+    const add=(element:Element|null,transform:(p:Pose)=>string)=>{
+      if(!element)return;
+      const a=element.animate(clip.map(({offset,pose})=>({offset,transform:transform(pose)})),{duration,fill:"both",easing:"linear"});
+      if(reduced.matches){a.currentTime=duration;a.pause();}
+      if(actor.closest('.is-paused'))a.pause();
+      animations.current.push(a);
     };
-    animate();reduced.addEventListener("change",animate);
-    return ()=>{reduced.removeEventListener("change",animate);animations.current.forEach(a=>a.cancel());animations.current=[];};
-  },[index,phase,duration]);
+    add(actor.querySelector('.robot-flight'),p=>`translate(calc(${p.x} * .12cqw), ${p.y}%) rotate(${p.turn}deg) scale(${p.size})`);
+    add(actor.querySelector('.ground-track'),p=>`translateX(calc(${p.x} * .12cqw)) scale(${p.size*Math.max(.35,1+p.y/100)})`);
+    add(actor.querySelector('[data-part="body"]'),p=>`translateY(${p.bob}px) rotate(${p.body}deg)`);
+    for(const part of parts)add(actor.querySelector(`[data-part="${part}"]`),p=>`rotate(${p[part]}deg)`);
+    const facing=actor.querySelector('.robot-facing')!;
+    const from=reset?`rotateY(${last.face<0?180:0}deg)`:facingSource;
+    const a=facing.animate([{transform:from},{transform:`rotateY(${last.face<0?180:0}deg)`}],{duration:180,fill:'both',easing:'ease-out'});
+    if(paused||reduced.matches){a.currentTime=180;a.pause();}animations.current.push(a);
+    if(reset&&phase==="intro"){const entrance=actor.animate([{opacity:0},{opacity:1}],{duration:180,fill:"both"});if(paused||reduced.matches){entrance.currentTime=180;entrance.pause();}animations.current.push(entrance);}
+    previous.current={index,phase};
+    const preference=()=>animations.current.forEach(a=>{if(reduced.matches){a.finish();a.pause();}else if(!actor.closest('.is-paused'))a.play();});
+    reduced.addEventListener('change',preference);
+    return ()=>reduced.removeEventListener('change',preference);
+  },[index,phase,duration,action,step,travel]);
+  useEffect(()=>()=>{animations.current.forEach(a=>a.cancel());},[]);
   useEffect(()=>{
     const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    animations.current.forEach(a=>{if(paused||reduced)a.pause();else a.play();});
+    animations.current.forEach(a=>{if(paused||reduced)a.pause();else if(Number(a.currentTime)<Number(a.effect?.getComputedTiming().endTime))a.play();});
   },[paused]);
   const prefix=`milo-${index}-${phase}`;
   const shell=`url(#${prefix}-shell)`;
@@ -57,13 +84,13 @@ export default function Robot({index,phase,duration,paused}:Props) {
       <g transform="translate(0 56)"><g data-part={front?"elbowFront":"elbowBack"}>
         <circle r="11" fill={dark}/><circle r="4" fill="#697179"/><path d="M-12 10 -15 43Q0 51 15 43L11 11Z" fill={shell}/>
         <path d="M-10 18 8 19" stroke="#f3a74c" strokeWidth="3"/><path d="M-10 47 -12 59 -4 66 3 61 10 66 17 58 11 47Z" fill={dark}/>
-        <path d="M-5 55 -4 63M6 54 8 63" stroke="#92928b" strokeWidth="3"/>
+        <path d="M-5 55 -4 63M6 54 8 63" stroke="#92928b" strokeWidth="3"/>{front&&<rect className="memory-core" x="10" y="47" width="18" height="18" rx="3" fill="#8cfff1" stroke="#e0ffff" strokeWidth="2"/>}
       </g></g>
     </g>
   </g>;
-  return <div ref={ref} className={`milo actor-${phase}`} aria-hidden="true" data-motion={index}>
+  return <div ref={ref} className={`milo actor-${phase} ${carrying?"has-core":""} ${index===4&&step===1&&phase==="success"?"core-grab":""}` } aria-hidden="true" data-motion={index}>
     <div className="ground-track"><div className="actor-shadow"/><div className="landing-dust"><i/><i/><i/><i/></div></div>
-    <div className="robot-flight">
+    <div className="robot-flight"><div className="robot-facing">
     <svg className="robot-rig" viewBox="0 0 320 340" fill="none" stroke="#17222b" strokeWidth="3" strokeLinejoin="round" overflow="visible">
       <defs>
         <linearGradient id={`${prefix}-shell`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff0cb"/><stop offset=".48" stopColor="#d8c8aa"/><stop offset="1" stopColor="#ac8555"/></linearGradient>
@@ -90,7 +117,7 @@ export default function Robot({index,phase,duration,paused}:Props) {
         {arm(true)}
       </g>
     </svg>
-    <div className="robot-charge"/><div className="carried-core"/><div className="speed-streaks"><i/><i/><i/></div>
+    </div><div className="robot-charge"/><div className="speed-streaks"><i/><i/><i/></div>
     </div>
   </div>;
 }

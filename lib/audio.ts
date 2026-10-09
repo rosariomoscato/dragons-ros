@@ -9,10 +9,10 @@ export class GameAudio {
       void this.context.resume().catch(() => {});
     } catch { /* Audio is optional on browsers without Web Audio. */ }
   }
-  tone(kind: "cue" | "success" | "failure" | "complete") {
+  tone(kind: "cue" | "success" | "failure" | "complete" | "transition") {
     if (!this.enabled || !this.context || this.context.state !== "running") return;
     const ctx = this.context;
-    const notes = kind === "success" ? [440, 660] : kind === "failure" ? [160, 95] : kind === "complete" ? [330, 440, 660, 880] : [520];
+    const notes = kind === "transition" ? [90,140,210] : kind === "success" ? [440, 660] : kind === "failure" ? [160, 95] : kind === "complete" ? [330, 440, 660, 880] : [520];
     notes.forEach((hz, i) => {
       const osc = ctx.createOscillator(), gain = ctx.createGain();
       const start = ctx.currentTime + i * .11;
